@@ -48,7 +48,7 @@ class Database:
                 print ("Database connection established")
 
                 #Basic idea of what we do python CLI integration
-                self._execute("SELECT * FROM genres;")
+                self._execute("SELECT * FROM genres;") #Setting it up such that its easier to execute code
                 print(self.curs.fetchone())
 
                 #Close the connections after they're done
@@ -59,8 +59,9 @@ class Database:
             print ("Connection failed")
 
     def _execute(self, command):
-        self.curs.execute("SELECT * FROM genres;")
+        self.curs.execute(command)
         self.conn.commit()
+
 
 if __name__ == "__main__":
     db = Database()
