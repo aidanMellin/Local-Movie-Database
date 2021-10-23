@@ -22,27 +22,45 @@ load_dotenv()
 USERNAME=getenv('USERNAME')
 PASSWORD=getenv('PASSWORD')
 
-try:
-    with SSHTunnelForwarder(
-        'starbug.cs.rit.edu',
-        ssh_username=USERNAME,
-        ssh_password=PASSWORD,
-        remote_bind_address=('localhost', 5432)) as server:
 
-        server.start()
-        print ("SSH tunnel established")
+class Database:
+    def __init__(self):
+        try:
+            with SSHTunnelForwarder(
+                'starbug.cs.rit.edu',
+                ssh_username=USERNAME,
+                ssh_password=PASSWORD,
+                remote_bind_address=('localhost', 5432)) as server:
 
-        params = {
-        'database': 'p320_14',
-        'user': USERNAME,
-        'password': PASSWORD,
-        'host': 'localhost',
-        'port': server.local_bind_port
-        }
+                server.start()
+                print ("SSH tunnel established")
 
-        conn = psycopg2.connect(**params)
-        curs = conn.cursor()
-        print ("Database connection established")
+                params = {
+                'database': 'p320_14',
+                'user': USERNAME,
+                'password': PASSWORD,
+                'host': 'localhost',
+                'port': server.local_bind_port
+                }
 
-except:
-    print ("Connection failed")
+                self.conn = psycopg2.connect(**params)
+                self.curs = self.conn.cursor()
+                print ("Database connection established")
+
+                #Basic idea of what we do python CLI integration
+                self._execute("SELECT * FROM genres;")
+                print(self.curs.fetchone())
+
+                #Close the connections after they're done
+                self.curs.close()
+                self.conn.close()
+
+        except:
+            print ("Connection failed")
+
+    def _execute(self, command):
+        self.curs.execute("SELECT * FROM genres;")
+        self.conn.commit()
+
+if __name__ == "__main__":
+    db = Database()
