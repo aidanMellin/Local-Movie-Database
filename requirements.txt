@@ -1,2 +1,2 @@
 sshtunnel
-dotenv
+python-dotenv
