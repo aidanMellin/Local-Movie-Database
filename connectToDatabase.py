@@ -12,22 +12,24 @@ if not exists(".env"):
     pInput = input("What is your CS@RIT Password: ")
     with open(".env", "w+") as f:
         f.write("# .env\n")
-        f.write("USERNAME="+uInput+"\n")
+        f.write("CSUSERNAME="+uInput+"\n")
         f.write("PASSWORD="+pInput+"\n")
 
 """
 Load dotenv file
 """
 load_dotenv()
-USERNAME = getenv('USERNAME')
-PASSWORD = getenv('PASSWORD')
+CSUSERNAME=getenv('CSUSERNAME')
+PASSWORD=getenv('PASSWORD')
+print(CSUSERNAME)
+print(PASSWORD)
 
 class Database:
     def __init__(self):
         try:
             with SSHTunnelForwarder(
                 'starbug.cs.rit.edu',
-                ssh_username=USERNAME,
+                ssh_username=CSUSERNAME,
                 ssh_password=PASSWORD,
                 remote_bind_address=('localhost', 5432)) as server:
 
@@ -36,7 +38,7 @@ class Database:
 
                 params = {
                 'database': 'p320_14',
-                'user': USERNAME,
+                'user': CSUSERNAME,
                 'password': PASSWORD,
                 'host': 'localhost',
                 'port': server.local_bind_port
