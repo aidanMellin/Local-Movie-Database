@@ -21,8 +21,6 @@ Load dotenv file
 load_dotenv()
 CSUSERNAME=getenv('CSUSERNAME')
 PASSWORD=getenv('PASSWORD')
-print(CSUSERNAME)
-print(PASSWORD)
 
 class Database:
     def __init__(self):
