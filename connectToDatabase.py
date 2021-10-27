@@ -19,8 +19,8 @@ if not exists(".env"):
 Load dotenv file
 """
 load_dotenv()
-USERNAME=getenv('USERNAME')
-PASSWORD=getenv('PASSWORD')
+USERNAME = getenv('USERNAME')
+PASSWORD = getenv('PASSWORD')
 
 class Database:
     def __init__(self):
