@@ -45,6 +45,13 @@ def loginSequence(self):
                         """, 
                         [adate, username,]
                     )
+                    self.curs.execute(
+                        """
+                        INSERT INTO access_date (username, date)
+                        VALUES(%s,%s)
+                        """, 
+                        [username, adate]
+                    )
                     self.conn.commit()
                     print("Welcome, " + username)
             except (Exception) as error:
@@ -109,6 +116,13 @@ def loginSequence(self):
                     VALUES(%s,%s,%s,%s,%s,%s,%s)
                     """, 
                     [username, password, email, fname, lname, cdate, cdate,]
+                )
+                self.curs.execute(
+                        """
+                        INSERT INTO access_date (username, date)
+                        VALUES(%s,%s)
+                        """, 
+                        [username, cdate]
                 )
                 self.conn.commit()
             except (Exception) as error:
