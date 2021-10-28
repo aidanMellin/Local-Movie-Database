@@ -1,3 +1,4 @@
+from logging import error
 import psycopg2
 import login
 from sshtunnel import SSHTunnelForwarder
@@ -8,83 +9,117 @@ from datetime import datetime
 
 def loginSequence(self):
     print("\n\nWelcome to the gitBash Movie Database.\n")
-    val = input("Choose an option by typing a number:\n[1]. Login to account\n[2]. Create an account\n")
-    escape = False
-    if val in ('1', 'l', 'login'):
-        while(escape != True):
-            username = input("Please enter your username: ")
-            password = input("Please enter your password: ")
-            try:
-                self.curs.execute(
-                    """
-                    SELECT * 
-                    FROM \"user\" 
-                    WHERE username = %s AND password = %s
-                    """, 
-                    [username, password,]
-                )
-                match = self.curs.fetchone()
-                if(match is not None):
-                    print("Welcome, " + username)
-                    escape = True
-                else:
-                    print("Incorrect username or password.\n")
-            except:
-                print("something wrong")
-        adate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
-
-
-    elif val in ('2', 'c', 'create'):
-        while(escape != True):
-            username = input("Please enter a username of 20 characters or less: ")
-            try:
-                self.curs.execute(
-                    """
-                    SELECT * 
-                    FROM \"user\" 
-                    WHERE username = %s
-                    """, 
-                    [username]
-                )
-                match = self.curs.fetchone()
-                if(match is None):
-                    escape = True
-                else:
-                    print("This username is already in use. Please choose another.\n")
-            except:
-                print("something wrong")
+    while True:
+        val = input("Choose an option by typing a number:\n[1]. Login to account\n[2]. Create an account\n[3]. Quit\n")
         escape = False
-        while(escape != True):
-            email = input("Please enter your email address: ")
+        if val in ('1', 'l', 'L', 'login', 'Login',):
+            while(escape != True):
+                username = input("Please enter your username: ")
+                password = input("Please enter your password: ")
+                try:
+                    self.curs.execute(
+                        """
+                        SELECT * 
+                        FROM \"user\" 
+                        WHERE username = %s AND password = %s
+                        """, 
+                        [username, password,]
+                    )
+                    match = self.curs.fetchone()
+                    if(match is not None):
+                        escape = True
+                    else:
+                        print("Incorrect username or password.\n")
+                except (Exception) as error:
+                    print("Something went wrong.\n", error)
+                    self.curs.close()
+                    self.conn.close()
+
+            adate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            try:
+                    self.curs.execute(
+                        """
+                        UPDATE \"user\"
+                        SET accessdate = %s
+                        WHERE username = %s
+                        """, 
+                        [adate, username,]
+                    )
+                    self.conn.commit()
+                    print("Welcome, " + username)
+            except (Exception) as error:
+                print("Something went wrong.\n", error)
+                self.curs.close()
+                self.conn.close()
+            return username
+
+
+        elif val in ('2', 'c', 'C', 'create', 'Create'):
+            while(escape != True):
+                username = input("Please enter a username of 20 characters or less: ")
+                try:
+                    self.curs.execute(
+                        """
+                        SELECT * 
+                        FROM \"user\" 
+                        WHERE username = %s
+                        """, 
+                        [username]
+                    )
+                    match = self.curs.fetchone()
+                    if(match is None):
+                        escape = True
+                    else:
+                        print("This username is already in use. Please choose another.\n")
+                except (Exception) as error:
+                    print("Something went wrong.\n", error)
+                    self.curs.close()
+                    self.conn.close()
+
+            escape = False
+            while(escape != True):
+                email = input("Please enter your email address: ")
+                try:
+                    self.curs.execute(
+                        """
+                        SELECT * 
+                        FROM \"user\" 
+                        WHERE email = %s
+                        """, 
+                        [email]
+                    )
+                    match = self.curs.fetchone()
+                    if(match is None):
+                        escape = True
+                    else:
+                        print("This email is already in use. Please use another.\n")
+                except (Exception) as error:
+                    print("Something went wrong.\n", error)
+                    self.curs.close()
+                    self.conn.close()
+
+            password = input("Please enter a password of 20 characters or less: ")
+            fname = input("Please enter your first name: ")
+            lname = input("Please enter your last name: ")
+            cdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             try:
                 self.curs.execute(
                     """
-                    SELECT * 
-                    FROM \"user\" 
-                    WHERE email = %s
+                    INSERT INTO \"user\" (username, password, email, fname, lname, accessdate, createdate)
+                    VALUES(%s,%s,%s,%s,%s,%s,%s)
                     """, 
-                    [email]
+                    [username, password, email, fname, lname, cdate, cdate,]
                 )
-                match = self.curs.fetchone()
-                if(match is None):
-                    escape = True
-                else:
-                    print("This email is already in use. Please use another.\n")
-            except:
-                print("something wrong")
-        password = input("Please enter a password of 20 characters or less: ")
-        fname = input("Please enter your first name: ")
-        lname = input("Please enter your last name: ")
-        cdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        try:
-            self.curs.execute(
-                """
-                INSERT INTO user (username, password, email, fname, lname, accessdate, createdate)
-                VALUES(%s,%s,%s,%s,%s,%s,%s)
-                """, 
-                [username, password, email, fname, lname, cdate, cdate,]
-            )
-            self.conn.commit()
-        except:
-            print("something wrong")
+                self.conn.commit()
+            except (Exception) as error:
+                    print("Something went wrong.\n", error)
+                    self.curs.close()
+                    self.conn.close()
+            return username
+
+        elif val in ('3', 'q', 'Q', 'quit', 'Quit'):
+            return None
+        
+        else:
+            print("Invalid choice.\n")
+

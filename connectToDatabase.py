@@ -58,6 +58,8 @@ class Database:
                 self.conn.close()
         except:
             print ("Connection failed")
+            self.curs.close()
+            self.conn.close()
 
     def _execute(self, command):
         self.curs.execute(command)
