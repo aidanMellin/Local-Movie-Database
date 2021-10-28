@@ -1,4 +1,5 @@
 import psycopg2
+import login
 from sshtunnel import SSHTunnelForwarder
 from os import getenv
 from os.path import exists
@@ -46,14 +47,15 @@ class Database:
                 self.curs = self.conn.cursor()
                 print ("Database connection established")
 
+                login.loginSequence(self)
+                
                 #Basic idea of what we do python CLI integration
-                self._execute("SELECT * FROM genres;") #Setting it up such that its easier to execute code
-                print(self.curs.fetchone())
+                #self._execute("SELECT * FROM genres;") #Setting it up such that its easier to execute code
+                #print(self.curs.fetchone())
 
                 #Close the connections after they're done
                 self.curs.close()
                 self.conn.close()
-
         except:
             print ("Connection failed")
 
