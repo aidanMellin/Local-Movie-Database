@@ -47,13 +47,33 @@ class Database:
                 self.curs = self.conn.cursor()
                 print ("Database connection established")
 
-                login.loginSequence(self)
-                
-                #Basic idea of what we do python CLI integration
-                #self._execute("SELECT * FROM genres;") #Setting it up such that its easier to execute code
-                #print(self.curs.fetchone())
+                currentUser = login.loginSequence(self)
+                if currentUser is not None:
+                    print ("\nWelcome, " + currentUser)
+                    loop = True
+                    while (loop):
+                        print ("\t===Main Menu===\n[1]. Logout of this account\n[2]. View/Modify collections\n[3]. Quit")
+                        val = int(input("Choose an option by typing a number: "))
 
-                #Close the connections after they're done
+                        if val == 1:
+                            currentUser = login.loginSequence(self)
+                            if currentUser is not None:
+                                print ("\nWelcome, " + currentUser)
+                            else:
+                                loop = False
+                        elif val == 2:
+                            print ("You picked Option 2\n")
+                        elif val == 3:
+                            loop = False
+                            print ("Goodbye!")
+                        else:
+                            print ("Invalid choice. Please input a valid number.\n")
+
+                # Basic idea of what we do python CLI integration
+                # self._execute("SELECT * FROM genres;") #Setting it up such that its easier to execute code
+                # print(self.curs.fetchone())
+
+                # Close the connections after they're done
                 self.curs.close()
                 self.conn.close()
         except:

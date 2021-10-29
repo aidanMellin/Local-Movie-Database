@@ -7,6 +7,7 @@ from os.path import exists
 from dotenv import load_dotenv
 from datetime import datetime
 
+
 def loginSequence(self):
     print("\n\nWelcome to the gitBash Movie Database.\n")
     while True:
@@ -53,17 +54,18 @@ def loginSequence(self):
                         [username, adate]
                     )
                     self.conn.commit()
-                    print("Welcome, " + username)
+                    # print("Welcome, " + username)
             except (Exception) as error:
                 print("Something went wrong.\n", error)
                 self.curs.close()
                 self.conn.close()
             return username
 
-
         elif val in ('2', 'c', 'C', 'create', 'Create'):
             while(escape != True):
                 username = input("Please enter a username of 20 characters or less: ")
+                while (len(username) > 20):
+                    username = input("That username was too long. Please enter a username of 20 characters or less: ")
                 try:
                     self.curs.execute(
                         """
@@ -106,6 +108,8 @@ def loginSequence(self):
                     self.conn.close()
 
             password = input("Please enter a password of 20 characters or less: ")
+            while (len(password) > 20):
+                password = input("That password was too long. Please enter a password of 20 characters or less: ")
             fname = input("Please enter your first name: ")
             lname = input("Please enter your last name: ")
             cdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -135,5 +139,5 @@ def loginSequence(self):
             return None
         
         else:
-            print("Invalid choice.\n")
+            print("Invalid choice. Please input a valid number.\n")
 
