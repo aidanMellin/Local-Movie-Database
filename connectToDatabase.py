@@ -1,5 +1,6 @@
 import psycopg2
 import login
+import mainMenu
 from sshtunnel import SSHTunnelForwarder
 from os import getenv
 from os.path import exists
@@ -47,27 +48,36 @@ class Database:
                 self.curs = self.conn.cursor()
                 print ("Database connection established")
 
-                currentUser = login.loginSequence(self)
-                if currentUser is not None:
-                    print ("\nWelcome, " + currentUser)
-                    loop = True
-                    while (loop):
-                        print ("\t===Main Menu===\n[1]. Logout of this account\n[2]. View/Modify collections\n[3]. Quit")
-                        val = int(input("Choose an option by typing a number: "))
-
-                        if val == 1:
-                            currentUser = login.loginSequence(self)
-                            if currentUser is not None:
-                                print ("\nWelcome, " + currentUser)
-                            else:
-                                loop = False
-                        elif val == 2:
-                            print ("You picked Option 2\n")
-                        elif val == 3:
+                loop = True
+                while loop:
+                    currentUser = login.loginSequence(self)
+                    if currentUser is not None:
+                        print("\nWelcome, " + currentUser)
+                        exitValue = mainMenu.mainMenu(self)
+                        if exitValue:
                             loop = False
-                            print ("Goodbye!")
-                        else:
-                            print ("Invalid choice. Please input a valid number.\n")
+
+                #currentUser = login.loginSequence(self)
+                #if currentUser is not None:
+                    #print ("\nWelcome, " + currentUser)
+                    #loop = True
+                    #while (loop):
+                        #print ("\t===Main Menu===\n[1]. Logout of this account\n[2]. View/Modify collections\n[3]. Quit")
+                        #val = int(input("Choose an option by typing a number: "))
+
+                        #if val == 1:
+                            #currentUser = login.loginSequence(self)
+                            #if currentUser is not None:
+                                #print ("\nWelcome, " + currentUser)
+                            #else:
+                                #loop = False
+                        #elif val == 2:
+                            #print ("You picked Option 2\n")
+                        #elif val == 3:
+                            #loop = False
+                            #print ("Goodbye!")
+                        #else:
+                            #print ("Invalid choice. Please input a valid number.\n")
 
                 # Basic idea of what we do python CLI integration
                 # self._execute("SELECT * FROM genres;") #Setting it up such that its easier to execute code
