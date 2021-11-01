@@ -11,7 +11,12 @@ from datetime import datetime
 def loginSequence(self):
     print("\n\nWelcome to the gitBash Movie Database.\n")
     while True:
-        val = input("Choose an option by typing a number:\n[1]. Login to account\n[2]. Create an account\n[3]. Quit\n")
+        print("\t===Login Menu===\n"
+              "[1]. Login to account\n"
+              "[2]. Create an account\n"
+              "[3]. Quit")
+
+        val = input("Choose an option by typing a number: ")
         escape = False
         if val in ('1', 'l', 'L', 'login', 'Login',):
             while(escape != True):

@@ -57,6 +57,8 @@ class Database:
                         exitValue = mainMenu.mainMenu(self)
                         if exitValue:
                             loop = False
+                    else:
+                        loop = False
 
                 # Close the connections after they're done
                 self.curs.close()
