@@ -9,16 +9,16 @@ def follow(self):
         print("username:",user)
     
     if action[0] in ('1', 'f'):
-        followUsername(user)
+        followUsername(self,user)
     elif action[0] in ('2'):
-        unfollow(user)
+        unfollow(self,user)
 
 
 def getUsername(self,email):
     try:
         self.curs.execute(
             """
-            SELECT username FROM user
+            SELECT username FROM \"user\"
             WHERE email=%s
             """,
             [email]
@@ -32,6 +32,7 @@ def getUsername(self,email):
         return False
 
 def followUsername(self, user):
+    print("in followUsername")
     try:
         self.curs.execute(
             """
