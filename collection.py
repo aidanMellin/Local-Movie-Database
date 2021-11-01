@@ -23,7 +23,7 @@ def collection(self):
             elif val == 4:
                 addMovie(self)
             elif val == 5:
-                print("5")
+                removeMovie(self)
             elif val == 6:
                 renameCollection(self)
             elif val == 7:
@@ -204,6 +204,20 @@ def renameCollection(self):
             try:
                 self.curs.execute(
                     """
+                    INSERT INTO \"collection\" (cname, username)
+                    VALUES(%s,%s)
+                    """,
+                    [rename, self.username,]
+                )
+                self.conn.commit()
+            except (Exception) as error:
+                print("Something went wrong.\n", error)
+                self.curs.close()
+                self.conn.close()
+
+            try:
+                self.curs.execute(
+                    """
                     UPDATE \"contains\" 
                     SET cname = %s
                     WHERE username = %s AND cname = %s
@@ -219,11 +233,10 @@ def renameCollection(self):
             try:
                 self.curs.execute(
                     """
-                    UPDATE \"collection\" 
-                    SET cname = %s
+                    DELETE FROM \"collection\" 
                     WHERE username = %s AND cname = %s
                     """,
-                    [rename, self.username, name,]
+                    [self.username, name,]
                 )
                 self.conn.commit()
             except (Exception) as error:
@@ -331,3 +344,84 @@ def addMovie(self):
                     print("Something went wrong.\n", error)
                     self.curs.close()
                     self.conn.close()
+
+def removeMovie(self):
+    escape = False
+    cname = input("Please enter the name for the Collection you want to remove from: ")
+    try:
+        self.curs.execute(
+            """
+            SELECT * 
+            FROM \"collection\" 
+            WHERE username = %s AND cname = %s
+            """,
+            [self.username, cname,]
+        )
+        match = self.curs.fetchone()
+        if match is None:
+            escape = True
+            print("You have no Collection with the name \""+cname+"\"")
+    except Exception as error:
+        print("Something went wrong.\n", error)
+        self.curs.close()
+        self.conn.close()
+
+    if not escape:
+        mname = input("Please enter the name of the movie you want to remove from "+cname+": ")
+        found = False
+        val = 0
+        choice = None
+        try:
+            self.curs.execute(
+                """
+                SELECT title, reldate 
+                FROM \"contains\" 
+                WHERE title LIKE %(mname)s AND cname = %(cname)s
+                ORDER BY title ASC
+                """,
+                {'mname': '%{}%'.format(mname), 'cname': cname}
+            )
+            match = self.curs.fetchall()
+            if len(match) == 0:
+                print("There are no movies with the name \""+mname+"\" in " + cname)
+            else:
+                found = True
+                print("Movies found in the search (" + str(len(match)) + "):")
+                for i, movie in enumerate(match):
+                    print(str(i+1) + ": " + movie[0] + ", " +
+                          str(movie[1].month) + "/" + str(movie[1].day) + "/" + str(movie[1].year))
+
+                try:
+                    loop = True
+                    while loop:
+                        val = int(input("Please enter the number for which movie you want to remove"
+                                        " or \'0\' to not remove any of them: "))
+                        if val <= len(match):
+                            loop = False
+                            if val != 0:
+                                choice = match[val-1]
+                        else:
+                            print("Invalid choice. Please input a valid number.\n")
+                except ValueError:
+                    print("Invalid choice. Please input a valid number.\n")
+        except Exception as error:
+            print("Something went wrong.\n", error)
+            self.curs.close()
+            self.conn.close()
+
+        if found and val != 0:
+            mname = choice[0]
+            reldate = choice[1]
+            try:
+                self.curs.execute(
+                    """
+                    DELETE FROM \"contains\" 
+                    WHERE username = %s AND cname = %s AND title = %s AND reldate = %s
+                    """,
+                    [self.username, cname, mname, reldate,]
+                )
+                self.conn.commit()
+            except (Exception) as error:
+                print("Something went wrong.\n", error)
+                self.curs.close()
+                self.conn.close()
