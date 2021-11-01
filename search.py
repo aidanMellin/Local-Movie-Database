@@ -7,7 +7,7 @@ def search(self):
               "[3] By Cast Members - Format: '3#first_name#last_name'\n"
               "[4] By Studio - Format: '4#studio'\n"
               "[5] By Genre - Format: '5#genre'\n"
-              "[6] Back to Main Menu - Format: '6'"
+              "[6] Back to Main Menu - Format: '6'\n"
               )
         try:
             command = input("Type a search command: ").split('#')
@@ -49,13 +49,14 @@ def sort(self, command_num, var1, var2=None):
               "OR\n\n"
               "[6] Watch Movie - Format: '6#movie_name#release_date' (YYYY-MM-DD)\n"
               "[7] Get Movie Release Date - Format: '7#movie_name'\n"
+              "[8] Rate Movie - Format: '8#movie_name#release_date#rating' (rating = 0.0-5.0)\n"
               )
         try:
             command = input("Type a command: ").split('#')
 
             sorts = {1: "movie.title", 2: "movie.reldate", 3: "movie.studio", 4: "categorized_as.gname"}
 
-            if len(command) == 2:
+            if len(command) == 2 and int(command[0]) < 5:
                 if 0 < int(command[0]) < 5 and (command[1] == "ASC" or command[1] == "DESC"):
                     if command_num == 3:
                         commands[command_num](self, var1, var2, sorts[int(command[0])], command[1])
@@ -67,10 +68,52 @@ def sort(self, command_num, var1, var2=None):
                 watchMovie(self, command[1], command[2])
             elif int(command[0]) == 7 and len(command) == 2:
                 getRelDate(self, command[1])
+            elif int(command[0]) == 8 and len(command) == 4:
+                rateMovie(self, command[1], command[2], command[3])
             else:
                 print("Invalid choice. Please input a valid command\n\n")
         except ValueError:
             print("Invalid choice. Please input a valid command\n\n")
+
+def rateMovie(self, movie_name, rel_date, rating):
+    try:
+        self.curs.execute("""
+            SELECT * FROM watches
+            WHERE watches.username = '{0}'
+            AND watches.title = '{1}'
+            AND watches.reldate = '{2}'
+        """.format(self.username, movie_name, rel_date))
+
+        results = self.curs.fetchone()
+        if results is not None:
+            self.curs.execute("""
+                UPDATE watches
+                SET rating = '{3}'
+                WHERE watches.username = '{0}'
+                AND watches.title = '{1}'
+                AND watches.reldate = '{2}'
+            """.format(self.username, movie_name, rel_date, rating))
+            self.conn.commit()
+            self.curs.execute("""
+                SELECT AVG(rating) FROM watches
+                WHERE watches.title = '{0}'
+                AND watches.reldate = '{1}'
+            """.format(movie_name, rel_date))
+            average = self.curs.fetchone()[0]
+            self.curs.execute("""
+                UPDATE movie
+                SET avgrate = {0}
+                WHERE movie.title = '{1}'
+                AND movie.reldate = '{2}'
+            """.format(average, movie_name, rel_date))
+            self.conn.commit()
+            print("Movie successfully rated!")
+        else:
+            print("Invalid input. Make sure you have watched this movie before and try again.")
+    except (Exception) as error:
+        print("Something went wrong.\n", error)
+        self.curs.close()
+        self.conn.close()
 
 
 def watchMovie(self, movie_name, rel_date):
