@@ -21,7 +21,7 @@ def collection(self):
             elif val == 3:
                 deleteCollection(self)
             elif val == 4:
-                print("4")
+                addMovie(self)
             elif val == 5:
                 print("5")
             elif val == 6:
@@ -176,12 +176,65 @@ def renameCollection(self):
         print("Something went wrong.\n", error)
         self.curs.close()
         self.conn.close()
+    if not escape:
+        rename = input("Please enter a name of 20 characters or less for the Collection: ")
+        while len(rename) > 20:
+            rename = input("That name was too long. Please enter a name of 20 characters or less: ")
+        duplicate = False
 
-    rename = input("Please enter a name of 20 characters or less for the Collection: ")
-    while len(rename) > 20:
-        rename = input("That name was too long. Please enter a name of 20 characters or less: ")
-    duplicate = False
+        try:
+            self.curs.execute(
+                """
+                SELECT * 
+                FROM \"collection\" 
+                WHERE username = %s AND cname = %s
+                """,
+                [self.username, rename,]
+            )
+            match = self.curs.fetchone()
+            if match is not None:
+                duplicate = True
+                print("You already have Collection with the name \""+rename+"\"")
+        except Exception as error:
+            print("Something went wrong.\n", error)
+            self.curs.close()
+            self.conn.close()
 
+        if not duplicate:
+            try:
+                self.curs.execute(
+                    """
+                    UPDATE \"contains\" 
+                    SET cname = %s
+                    WHERE username = %s AND cname = %s
+                    """,
+                    [rename, self.username, name,]
+                )
+                self.conn.commit()
+            except (Exception) as error:
+                print("Something went wrong.\n", error)
+                self.curs.close()
+                self.conn.close()
+
+            try:
+                self.curs.execute(
+                    """
+                    UPDATE \"collection\" 
+                    SET cname = %s
+                    WHERE username = %s AND cname = %s
+                    """,
+                    [rename, self.username, name,]
+                )
+                self.conn.commit()
+            except (Exception) as error:
+                print("Something went wrong.\n", error)
+                self.curs.close()
+                self.conn.close()
+
+
+def addMovie(self):
+    escape = False
+    cname = input("Please enter the name for the Collection you want to add to: ")
     try:
         self.curs.execute(
             """
@@ -189,44 +242,92 @@ def renameCollection(self):
             FROM \"collection\" 
             WHERE username = %s AND cname = %s
             """,
-            [self.username, rename,]
+            [self.username, cname,]
         )
         match = self.curs.fetchone()
-        if match is not None:
-            duplicate = True
-            print("You already have Collection with the name \""+rename+"\"")
+        if match is None:
+            escape = True
+            print("You have no Collection with the name \""+cname+"\"")
     except Exception as error:
         print("Something went wrong.\n", error)
         self.curs.close()
         self.conn.close()
 
-    if not duplicate:
+    if not escape:
+        mname = input("Please enter the name of the movie you want to add to "+cname+": ")
+        found = False
+        val = 0
+        choice = None
         try:
             self.curs.execute(
                 """
-                UPDATE \"collection\" 
-                SET cname = %s
-                WHERE username = %s AND cname = %s
+                SELECT title, reldate 
+                FROM \"movie\" 
+                WHERE title LIKE %(mname)s
+                ORDER BY title ASC
                 """,
-                [rename, self.username, name,]
+                {'mname': '%{}%'.format(mname)}
             )
-            self.conn.commit()
-        except (Exception) as error:
+            match = self.curs.fetchall()
+            if len(match) == 0:
+                print("There are no movies with the name \""+mname+"\"")
+            else:
+                found = True
+                print("Movies found in the search (" + str(len(match)) + "):")
+                for i, movie in enumerate(match):
+                    print(str(i+1) + ": " + movie[0] + ", " +
+                          str(movie[1].month) + "/" + str(movie[1].day) + "/" + str(movie[1].year))
+
+                try:
+                    loop = True
+                    while loop:
+                        val = int(input("Please enter the number for which movie you want to add"
+                                        " or \'0\' to not add any of them: "))
+                        if val <= len(match):
+                            loop = False
+                            if val != 0:
+                                choice = match[val-1]
+                        else:
+                            print("Invalid choice. Please input a valid number.\n")
+                except ValueError:
+                    print("Invalid choice. Please input a valid number.\n")
+        except Exception as error:
             print("Something went wrong.\n", error)
             self.curs.close()
             self.conn.close()
 
-        try:
-            self.curs.execute(
-                """
-                UPDATE \"contains\" 
-                SET cname = %s
-                WHERE username = %s AND cname = %s
-                """,
-                [rename, self.username, name,]
-            )
-            self.conn.commit()
-        except (Exception) as error:
-            print("Something went wrong.\n", error)
-            self.curs.close()
-            self.conn.close()
+        if found and val != 0:
+            mname = choice[0]
+            reldate = choice[1]
+            duplicate = False
+            try:
+                self.curs.execute(
+                    """
+                    SELECT *
+                    FROM \"contains\" 
+                    WHERE username = %s AND cname = %s AND title = %s AND reldate = %s
+                    """,
+                    [self.username, cname, mname, reldate,]
+                )
+                match = self.curs.fetchone()
+                if match is not None:
+                    duplicate = True
+                    print("You already have " + mname + " in " + cname)
+            except (Exception) as error:
+                print("Something went wrong.\n", error)
+                self.curs.close()
+                self.conn.close()
+            if not duplicate:
+                try:
+                    self.curs.execute(
+                        """
+                        INSERT INTO \"contains\" 
+                        VALUES (%s,%s,%s,%s)
+                        """,
+                        [mname, reldate, cname, self.username,]
+                    )
+                    self.conn.commit()
+                except (Exception) as error:
+                    print("Something went wrong.\n", error)
+                    self.curs.close()
+                    self.conn.close()
