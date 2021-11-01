@@ -23,7 +23,7 @@ def getUsername(self,email):
             """,
             [email]
         )
-        print(self.fetchone())
+        print("Fetched Username:",self.fetchone())
         return self.fetchone()
     except (Exception) as error:
         print("Something went wrong.\n", error)
@@ -41,6 +41,7 @@ def followUsername(self, user):
             """,
             [self.username, user]
         )
+        self.conn.commit()
         print("User followed successfully.")
     except (Exception) as error:
         print("Something went wrong.\n", error)
@@ -57,6 +58,7 @@ def unfollow(self, user):
             """,
             [self.username, user,]
         )
+        self.conn.commit()
         print("User unfollowed successfully")
     except (Exception) as error:
         print("Something went wrong.\n", error)
