@@ -25,7 +25,7 @@ def collection(self):
             elif val == 5:
                 print("5")
             elif val == 6:
-                print("6")
+                renameCollection(self)
             elif val == 7:
                 loop = False
             else:
@@ -48,8 +48,7 @@ def printCollection(self):
         match = self.curs.fetchall()
         if(match is not None):
             for cname in match:
-                for name in cname:
-                    print(name)
+                print(cname[0])
         else:
             print("You have no Collections...")
     except (Exception) as error:
@@ -98,7 +97,7 @@ def createCollection(self):
 
 def deleteCollection(self):
     escape = False
-    name = input("Please enter the name for the Collection you wan to delete: ")
+    name = input("Please enter the name for the Collection you want to delete: ")
     try:
         self.curs.execute(
             """
@@ -155,3 +154,79 @@ def deleteCollection(self):
                 print("Something went wrong.\n", error)
                 self.curs.close()
                 self.conn.close()
+
+
+def renameCollection(self):
+    escape = False
+    name = input("Please enter the name for the Collection you want to rename: ")
+    try:
+        self.curs.execute(
+            """
+            SELECT * 
+            FROM \"collection\" 
+            WHERE username = %s AND cname = %s
+            """,
+            [self.username, name,]
+        )
+        match = self.curs.fetchone()
+        if match is None:
+            escape = True
+            print("You have no Collection with the name \""+name+"\"")
+    except Exception as error:
+        print("Something went wrong.\n", error)
+        self.curs.close()
+        self.conn.close()
+
+    rename = input("Please enter a name of 20 characters or less for the Collection: ")
+    while len(rename) > 20:
+        rename = input("That name was too long. Please enter a name of 20 characters or less: ")
+    duplicate = False
+
+    try:
+        self.curs.execute(
+            """
+            SELECT * 
+            FROM \"collection\" 
+            WHERE username = %s AND cname = %s
+            """,
+            [self.username, rename,]
+        )
+        match = self.curs.fetchone()
+        if match is not None:
+            duplicate = True
+            print("You already have Collection with the name \""+rename+"\"")
+    except Exception as error:
+        print("Something went wrong.\n", error)
+        self.curs.close()
+        self.conn.close()
+
+    if not duplicate:
+        try:
+            self.curs.execute(
+                """
+                UPDATE \"collection\" 
+                SET cname = %s
+                WHERE username = %s AND cname = %s
+                """,
+                [rename, self.username, name,]
+            )
+            self.conn.commit()
+        except (Exception) as error:
+            print("Something went wrong.\n", error)
+            self.curs.close()
+            self.conn.close()
+
+        try:
+            self.curs.execute(
+                """
+                UPDATE \"contains\" 
+                SET cname = %s
+                WHERE username = %s AND cname = %s
+                """,
+                [rename, self.username, name,]
+            )
+            self.conn.commit()
+        except (Exception) as error:
+            print("Something went wrong.\n", error)
+            self.curs.close()
+            self.conn.close()
