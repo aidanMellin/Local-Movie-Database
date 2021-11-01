@@ -9,7 +9,8 @@ def collection(self):
               "[4] Add a Movie to a Collection\n"
               "[5] Remove a Movie to a Collection\n"
               "[6] Rename a Collection\n"
-              "[7]. Exit to Main Menu")
+              "[7] Watch a movie from a Collection\n"
+              "[8]. Exit to Main Menu")
 
         try:
             val = int(input("Choose an option by typing a number: "))
@@ -26,7 +27,7 @@ def collection(self):
                 removeMovie(self)
             elif val == 6:
                 renameCollection(self)
-            elif val == 7:
+            elif val == 8:
                 loop = False
             else:
                 print("Invalid choice. Please input a valid number.\n")
@@ -46,9 +47,33 @@ def printCollection(self):
             [self.username,]
         )
         match = self.curs.fetchall()
-        if(match is not None):
-            for cname in match:
-                print(cname[0])
+        if match is not None:
+            for group in match:
+                cname = group[0]
+                self.curs.execute(
+                    """
+                    SELECT COUNT (*)
+                    FROM \"contains\"
+                    WHERE username = %s AND cname = %s
+                    """,
+                    [self.username, cname]
+                )
+                amount = self.curs.fetchone()
+                self.curs.execute(
+                    """
+                    SELECT SUM(M.length) 
+                    FROM \"movie\" M, \"contains\" C
+                    WHERE C.username = %s AND C.cname = %s AND C.title = M.title AND C.reldate = M.reldate
+                    """,
+                    [self.username, cname]
+                )
+                total = self.curs.fetchone()
+                if total[0] is None:
+                    total = 0
+                else:
+                    total = total[0]
+                print(cname + ", Movies in collection: " + str(amount[0]) +
+                      ", Total length of movies: " + str(total // 60) + " hours:" + str(total % 60) + " minutes")
         else:
             print("You have no Collections...")
     except (Exception) as error:
@@ -345,9 +370,11 @@ def addMovie(self):
                     self.curs.close()
                     self.conn.close()
 
+
 def removeMovie(self):
     escape = False
     cname = input("Please enter the name for the Collection you want to remove from: ")
+
     try:
         self.curs.execute(
             """
@@ -367,49 +394,42 @@ def removeMovie(self):
         self.conn.close()
 
     if not escape:
-        mname = input("Please enter the name of the movie you want to remove from "+cname+": ")
-        found = False
         val = 0
         choice = None
         try:
             self.curs.execute(
                 """
-                SELECT title, reldate 
-                FROM \"contains\" 
-                WHERE title LIKE %(mname)s AND cname = %(cname)s
-                ORDER BY title ASC
+                SELECT * 
+                FROM \"contains\"
+                WHERE username = %s AND cname = %s
                 """,
-                {'mname': '%{}%'.format(mname), 'cname': cname}
+                [self.username, cname]
             )
             match = self.curs.fetchall()
-            if len(match) == 0:
-                print("There are no movies with the name \""+mname+"\" in " + cname)
-            else:
-                found = True
-                print("Movies found in the search (" + str(len(match)) + "):")
-                for i, movie in enumerate(match):
-                    print(str(i+1) + ": " + movie[0] + ", " +
-                          str(movie[1].month) + "/" + str(movie[1].day) + "/" + str(movie[1].year))
 
-                try:
-                    loop = True
-                    while loop:
-                        val = int(input("Please enter the number for which movie you want to remove"
-                                        " or \'0\' to not remove any of them: "))
-                        if val <= len(match):
-                            loop = False
-                            if val != 0:
-                                choice = match[val-1]
-                        else:
-                            print("Invalid choice. Please input a valid number.\n")
-                except ValueError:
-                    print("Invalid choice. Please input a valid number.\n")
+            print("Items in collection: " + str(len(match)))
+            for i, mname in enumerate(match):
+                print(str(i+1) + ": " + mname[0])
+
+            try:
+                loop = True
+                while loop:
+                    val = int(input("Please enter the number for which movie you want to remove"
+                                    " or \'0\' to not remove any of them: "))
+                    if val <= len(match):
+                        loop = False
+                        if val != 0:
+                            choice = match[val-1]
+                    else:
+                        print("Invalid choice. Please input a valid number.\n")
+            except ValueError:
+                print("Invalid choice. Please input a valid number.\n")
         except Exception as error:
             print("Something went wrong.\n", error)
             self.curs.close()
             self.conn.close()
 
-        if found and val != 0:
+        if val != 0:
             mname = choice[0]
             reldate = choice[1]
             try:
