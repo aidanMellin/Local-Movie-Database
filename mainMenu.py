@@ -7,20 +7,20 @@ def mainMenu(self):
     quit = False
     while not exit:
         print("\t===Main Menu===\n"
-              "[1] Collections\n"
-              "[2] Watch/Play\n"
-              "[3] Search\n"
-              "[4] Followers\n"
-              "[5] Display Main Menu\n"
-              "[6]. Logout of this account\n"
-              "[7]. Quit")
+            "[1] Collections\n"
+            "[2] Watch/Play\n"
+            "[3] Search\n"
+            "[4] Followers\n"
+            "[5] Display Main Menu\n"
+            "[6]. Logout of this account\n"
+            "[7]. Quit")
         try:
             val = int(input("Choose an option by typing a number: "))
 
             if val == 3:
                 search.search(self)
             elif val == 4:
-                self.follow(self)
+                follow.follow(self)
             elif val == 6:
                 exit = True
             elif val == 7:
