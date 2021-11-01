@@ -1,4 +1,5 @@
 import search
+import follow
 
 
 def mainMenu(self):
@@ -18,6 +19,8 @@ def mainMenu(self):
 
             if val == 3:
                 search.search(self)
+            elif val == 4:
+                self.follow(self)
             elif val == 6:
                 exit = True
             elif val == 7:
