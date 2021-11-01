@@ -12,8 +12,8 @@ def mainMenu(self):
             "[3] Search\n"
             "[4] Followers\n"
             "[5] Display Main Menu\n"
-            "[6]. Logout of this account\n"
-            "[7]. Quit")
+            "[6] Logout of this account\n"
+            "[7] Quit")
         try:
             val = int(input("Choose an option by typing a number: "))
 
