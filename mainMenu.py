@@ -9,24 +9,22 @@ def mainMenu(self):
     while not exit:
         print("\t===Main Menu===\n"
               "[1] Collections\n"
-              "[2] Watch/Play\n"
-              "[3] Search\n"
-              "[4] Followers\n"
-              "[5] Display Main Menu\n"
-              "[6]. Logout of this account\n"
-              "[7]. Quit")
+              "[2] Search\n"
+              "[3] Followers\n"
+              "[4] Logout of this account\n"
+              "[5] Quit")
         try:
             val = int(input("Choose an option by typing a number: "))
 
             if val == 1:
                 collection.collection(self)
-            elif val == 3:
+            elif val == 2:
                 search.search(self)
-            elif val == 4:
+            elif val == 3:
                 follow.follow(self)
-            elif val == 6:
+            elif val == 4:
                 exit = True
-            elif val == 7:
+            elif val == 5:
                 quit = True
                 exit = True
             else:
