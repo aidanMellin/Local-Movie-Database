@@ -1,1 +1,6 @@
 .env
+.vscode/launch.json
+__pycache__/login.cpython-38.pyc
+__pycache__/follow.cpython-38.pyc
+__pycache__/mainMenu.cpython-38.pyc
+__pycache__/search.cpython-38.pyc

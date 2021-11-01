@@ -26,6 +26,7 @@ PASSWORD=getenv('PASSWORD')
 
 class Database:
     def __init__(self):
+        self.username = ""
         try:
             with SSHTunnelForwarder(
                 'starbug.cs.rit.edu',

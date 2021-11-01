@@ -17,6 +17,7 @@ def loginSequence(self):
             while(escape != True):
                 username = input("Please enter your username: ")
                 password = input("Please enter your password: ")
+                self.username = username
                 try:
                     self.curs.execute(
                         """
@@ -38,23 +39,23 @@ def loginSequence(self):
 
             adate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             try:
-                    self.curs.execute(
-                        """
-                        UPDATE \"user\"
-                        SET accessdate = %s
-                        WHERE username = %s
-                        """, 
-                        [adate, username,]
-                    )
-                    self.curs.execute(
-                        """
-                        INSERT INTO access_date (username, date)
-                        VALUES(%s,%s)
-                        """, 
-                        [username, adate]
-                    )
-                    self.conn.commit()
-                    # print("Welcome, " + username)
+                self.curs.execute(
+                    """
+                    UPDATE \"user\"
+                    SET accessdate = %s
+                    WHERE username = %s
+                    """, 
+                    [adate, username,]
+                )
+                self.curs.execute(
+                    """
+                    INSERT INTO access_date (username, date)
+                    VALUES(%s,%s)
+                    """, 
+                    [username, adate]
+                )
+                self.conn.commit()
+                # print("Welcome, " + username)
             except (Exception) as error:
                 print("Something went wrong.\n", error)
                 self.curs.close()
@@ -66,6 +67,7 @@ def loginSequence(self):
                 username = input("Please enter a username of 20 characters or less: ")
                 while (len(username) > 20):
                     username = input("That username was too long. Please enter a username of 20 characters or less: ")
+                self.username = username
                 try:
                     self.curs.execute(
                         """
