@@ -3,7 +3,7 @@ def follow(self):
     action = input("Would you like to\n\t[1]: follow\n\t[2] unfollow\na user? ").lower()
     user = input("what is the name of the user in question? [email or username] ").lower()
     if "@" in user:
-        user = getUsername(user)
+        user = getUsername(self,user)
         print("username:",user)
     
     if action[0] in ('1', 'f'):
@@ -16,13 +16,13 @@ def getUsername(self,email):
     try:
         self.curs.execute(
             """
-            SELECT username FROM 'user'
+            SELECT username FROM \"user\"
             WHERE email=%s
             """,
             [email]
         )
-        print("Fetched Username:",self.fetchone())
-        return self.fetchone()
+        print("Fetched Username:",self.curs.fetchone())
+        return self.curs.fetchone()
     except (Exception) as error:
         print("Something went wrong.\n", error)
         self.curs.close()
