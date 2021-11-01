@@ -28,8 +28,8 @@ def mainMenu(self):
                 quit = True
                 exit = True
             else:
-                print("Invalid choice. Please input a valid number.\n")
+                print("Invalid choice. Please input a valid number.\n\n")
         except ValueError:
-            print("Invalid choice. Please input a valid number.\n")
+            print("Invalid choice. Please input a valid number.\n\n")
 
     return quit
