@@ -3,8 +3,6 @@ def follow(self):
     action = input("Would you like to\n\t[1]: follow\n\t[2] unfollow\na user? ").lower()
     user = input("what is the name of the user in question? [email or username] ").lower()
     if "@" in user:
-        print("translating from email. user old =", user)
-        print("have self.username =",self.username)
         user = getUsername(user)
         print("username:",user)
     
@@ -18,7 +16,7 @@ def getUsername(self,email):
     try:
         self.curs.execute(
             """
-            SELECT username FROM \"user\"
+            SELECT username FROM 'user'
             WHERE email=%s
             """,
             [email]
@@ -42,7 +40,7 @@ def followUsername(self, user):
             [self.username, user]
         )
         self.conn.commit()
-        print("User followed successfully.")
+        print("User followed successfully.\n")
     except (Exception) as error:
         print("Something went wrong.\n", error)
         self.curs.close()
@@ -59,7 +57,7 @@ def unfollow(self, user):
             [self.username, user,]
         )
         self.conn.commit()
-        print("User unfollowed successfully")
+        print("User unfollowed successfully\n")
     except (Exception) as error:
         print("Something went wrong.\n", error)
         self.curs.close()
