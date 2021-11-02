@@ -465,7 +465,6 @@ def watchMovie(self):
             results = self.curs.fetchall()
             if results is not None:
                 for movie in results:
-                    reldate = str(movie[1])
                     loop = False
                     print(reldate)
             else:
@@ -516,7 +515,7 @@ def watchMovie(self):
         [self.username, movieName,]
         )
         self.conn.commit()
-        print("Successfully logged your watching of", movieName)
+        print("Successfully logged your watching of", movieName+"\n")
     except Exception as error:
         print("Something went wrong.\n", error)
         self.curs.close()
