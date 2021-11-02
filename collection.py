@@ -160,7 +160,7 @@ def deleteCollection(self):
             try:
                 self.curs.execute(
                     """
-                    DELETE FROM \"collection\" 
+                    DELETE FROM \"contains\" 
                     WHERE username = %s AND cname = %s
                     """,
                     [self.username, name,]
@@ -170,11 +170,11 @@ def deleteCollection(self):
                 print("Something went wrong.\n", error)
                 self.curs.close()
                 self.conn.close()
-
+            
             try:
                 self.curs.execute(
                     """
-                    DELETE FROM \"contains\" 
+                    DELETE FROM \"collection\" 
                     WHERE username = %s AND cname = %s
                     """,
                     [self.username, name,]
