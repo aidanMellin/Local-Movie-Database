@@ -168,8 +168,89 @@ def getRelDate(self, movie_name):
 
 def searchByName(self, name, sort_num="movie.title, movie.reldate", order="ASC"):
     try:
-        self.curs.execute(
-        """
+        self.curs.execute("""
+            SELECT movie.title, movie.reldate FROM movie
+            INNER JOIN categorized_as ON movie.title = categorized_as.title
+            WHERE movie.title LIKE '%{0}%'
+            ORDER BY {1} {2}
+        """.format(name, sort_num, order))
+
+        results = self.curs.fetchall()
+        if results is not None:
+            for movie_name in results:
+                if "'" in movie_name[0]:
+                    self.curs.execute("""
+                        SELECT movie.title, movie.length, movie.mpaa, movie.avgrate FROM movie
+                        WHERE movie.title LIKE '%{0}%'
+                        AND movie.reldate = '{1}'
+                    """.format(movie_name[0].split("'")[1][1:], movie_name[1]))
+                    data = self.curs.fetchone()
+                    self.curs.execute("""
+                        SELECT acted_by.fname, acted_by.lname FROM acted_by
+                        WHERE acted_by.title LIKE '%{0}%'
+                        AND acted_by.reldate = '{1}'
+                    """.format(movie_name[0].split("'")[1][1:], movie_name[1]))
+                    actors = self.curs.fetchall()
+                    self.curs.execute("""
+                        SELECT directed_by.fname, directed_by.lname FROM directed_by
+                        WHERE directed_by.title LIKE '%{0}%'
+                        AND directed_by.reldate = '{1}'
+                    """.format(movie_name[0].split("'")[1][1:], movie_name[1]))
+                    directors = self.curs.fetchall()
+                    print("Title: " + data[0])
+                    print("Cast Members: ")
+                    for actor in actors:
+                        print("\t" + actor[0] + " " + actor[1])
+                    print("Directors: ")
+                    for director in directors:
+                        print("\t" + director[0] + " " + director[1])
+                    print("Length: " + str(data[1]))
+                    print("MPAA: " + data[2])
+                    print("User Rating: " + str(data[3]) + "\n")
+                else:
+                    self.curs.execute("""
+                        SELECT movie.title, movie.length, movie.mpaa, movie.avgrate FROM movie
+                        WHERE movie.title = '{0}'
+                        AND movie.reldate = '{1}'
+                    """.format(movie_name[0], movie_name[1]))
+                    data = self.curs.fetchone()
+                    self.curs.execute("""
+                        SELECT acted_by.fname, acted_by.lname FROM acted_by
+                        WHERE acted_by.title = '{0}'
+                        AND acted_by.reldate = '{1}'
+                    """.format(movie_name[0], movie_name[1]))
+                    actors = self.curs.fetchall()
+                    self.curs.execute("""
+                        SELECT directed_by.fname, directed_by.lname FROM directed_by
+                        WHERE directed_by.title = '{0}'
+                        AND directed_by.reldate = '{1}'
+                    """.format(movie_name[0], movie_name[1]))
+                    directors = self.curs.fetchall()
+                    print("Title: " + data[0])
+                    print("Cast Members: ")
+                    for actor in actors:
+                        print("\t" + actor[0] + " " + actor[1])
+                    print("Directors: ")
+                    for director in directors:
+                        print("\t" + director[0] + " " + director[1])
+                    print("Length: " + str(data[1]))
+                    print("MPAA: " + data[2])
+                    print("User Rating: " + str(data[3]) + "\n")
+        else:
+            print("There are no movies with that title. Please try again")
+    except (Exception) as error:
+        print("Something went wrong.\n", error)
+        self.curs.close()
+        self.conn.close()
+
+
+
+
+
+"""""
+
+        #self.curs.execute(
+        
         SELECT movie.title, acted_by.fname, acted_by.lname, directed_by.fname, directed_by.lname, movie.length, 
             movie.mpaa, movie.avgrate FROM movie
         INNER JOIN acted_by ON movie.title = acted_by.title
@@ -177,17 +258,14 @@ def searchByName(self, name, sort_num="movie.title, movie.reldate", order="ASC")
         INNER JOIN categorized_as ON movie.title = categorized_as.title
         WHERE movie.title LIKE '%{0}%'
         ORDER BY {1} {2}
-        """.format(name, sort_num, order))
+        .format(name, sort_num, order))
         result = self.curs.fetchall()
         if result is None:
             print("There are no movies with that title. Please try again")
         else:
             for entry in result:
                 print(entry)
-    except (Exception) as error:
-        print("Something went wrong.\n", error)
-        self.curs.close()
-        self.conn.close()
+"""""
 
 def searchByStudio(self, studio, sort_num="movie.title, movie.reldate", order="ASC"):
     try:
