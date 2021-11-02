@@ -127,7 +127,7 @@ def createCollection(self):
 
 def deleteCollection(self):
     escape = False
-    name = input("Please enter the name for the Collection you want to delete: ")
+    name = input("Please enter the name of the Collection you want to delete: ")
     try:
         self.curs.execute(
             """
@@ -188,7 +188,7 @@ def deleteCollection(self):
 
 def renameCollection(self):
     escape = False
-    name = input("Please enter the name for the Collection you want to rename: ")
+    name = input("Please enter the name of the Collection you want to rename: ")
     try:
         self.curs.execute(
             """
@@ -277,7 +277,7 @@ def renameCollection(self):
 
 def addMovie(self):
     escape = False
-    cname = input("Please enter the name for the Collection you want to add to: ")
+    cname = input("Please enter the name of the Collection you want to add to: ")
     try:
         self.curs.execute(
             """
@@ -378,7 +378,7 @@ def addMovie(self):
 
 def removeMovie(self):
     escape = False
-    cname = input("Please enter the name for the Collection you want to remove from: ")
+    cname = input("Please enter the name of the Collection you want to remove from: ")
 
     try:
         self.curs.execute(
@@ -452,21 +452,64 @@ def removeMovie(self):
                 self.conn.close()
 
 def watchMovie(self):
+    movies = []
+
     loop = True
-    reldate = ""
     while loop:
-        movieName = input("Please enter the name of the movie that you would like to watch: ").title()
-        try:
+        cName = input("Please enter the name of the collection of movies that you would like to watch: ")
+
+        try: #Make sure collection is valid
+            self.curs.execute("""
+            SELECT cname 
+            FROM collection
+            WHERE username=%s AND cname=%s;
+            """,
+            [self.username, cName]
+            )
+            results = self.curs.fetchall()
+            if results != []:
+                loop = False
+                print("Searching for Collection:", cName)
+            else:
+                print("Invalid collection name. Try again\n")
+        except Exception as error:
+            print("Something went wrong.\n", error)
+            self.curs.close()
+            self.conn.close()
+
+    try: #Get movies in collection
+        self.curs.execute("""
+            SELECT title 
+            FROM contains
+            WHERE cname=%s;
+        """,
+        [cName]
+        )
+        results = self.curs.fetchall()
+        if results is not None:
+            for movie in results:
+                movies.append(movie[0])
+
+    except Exception as error:
+        print("Something went wrong.\n", error)
+        self.curs.close()
+        self.conn.close()
+
+    for movieName in movies:
+        if "'" in movieName:
+            movieName = movieName.split("'")[1][1:]
+        reldate = ""
+        try: #Get the release date of the movie
             self.curs.execute("""
                 SELECT movie.title, movie.reldate FROM movie
-                WHERE movie.title LIKE '%{0}%'
+                WHERE movie.title LIKE \'%{0}%\'
             """.format(movieName))
 
             results = self.curs.fetchall()
             if results is not None:
                 for movie in results:
-                    loop = False
-                    print(reldate)
+                    movieName = str(movie[0])
+                    reldate = str(movie[1])
             else:
                 print("There are no movies with that name. Please try again.")
         except (Exception) as error:
@@ -474,49 +517,50 @@ def watchMovie(self):
             self.curs.close()
             self.conn.close()
 
-    try:
-        self.curs.execute(
+
+        try:
+            self.curs.execute(
+                """
+                SELECT *
+                FROM watches
+                WHERE username=%s AND title=%s;
+                """,
+                [self.username, movieName,]
+            )
+            match = self.curs.fetchone()
+            if match is None:
+                try:
+                    self.curs.execute(
+                    """
+                    INSERT INTO watches (username, reldate, title)
+                    VALUES (%s, %s, %s)
+                    """,
+                    [self.username, reldate, movieName,]
+                    )
+                    self.conn.commit()
+                except Exception as error:
+                    print("Something went wrong.\n", error)
+                    self.curs.close()
+                    self.conn.close()       
+            
+        except Exception as error:
+            print("Something went wrong.\n", error)
+            self.curs.close()
+            self.conn.close()
+
+        try:
+            self.curs.execute(
             """
-            SELECT *
-            FROM watches
+            UPDATE watches
+            SET watched = watched + 1
             WHERE username=%s AND title=%s;
+
             """,
             [self.username, movieName,]
-        )
-        match = self.curs.fetchone()
-        if match is None:
-            try:
-                self.curs.execute(
-                """
-                INSERT INTO watches (username, reldate, title)
-                VALUES (%s, %s, %s)
-                """,
-                [self.username, reldate, movieName,]
-                )
-                self.conn.commit()
-            except Exception as error:
-                print("Something went wrong.\n", error)
-                self.curs.close()
-                self.conn.close()       
-        
-    except Exception as error:
-        print("Something went wrong.\n", error)
-        self.curs.close()
-        self.conn.close()
-
-    try:
-        self.curs.execute(
-        """
-        UPDATE watches
-        SET watched = watched + 1
-        WHERE username=%s AND title=%s;
-
-        """,
-        [self.username, movieName,]
-        )
-        self.conn.commit()
-        print("Successfully logged your watching of", movieName+"\n")
-    except Exception as error:
-        print("Something went wrong.\n", error)
-        self.curs.close()
-        self.conn.close()
+            )
+            self.conn.commit()
+            print("Successfully logged your watching of", movieName+"\n")
+        except Exception as error:
+            print("Something went wrong.\n", error)
+            self.curs.close()
+            self.conn.close()
