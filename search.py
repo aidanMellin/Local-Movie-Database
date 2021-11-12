@@ -1,3 +1,5 @@
+from datetime import datetime
+
 def search(self):
     goBack = False
     while not goBack:
@@ -135,12 +137,30 @@ def watchMovie(self, movie_name, rel_date):
                 AND watches.reldate = '{2}'
             """.format(self.username, movie_name, rel_date))
             self.conn.commit()
+            wdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            self.curs.execute(
+            """
+            INSERT INTO watchtime (title, reldate, watchtime)
+            VALUES (%s, %s, %s)
+            """,
+            [movie_name, rel_date, wdate, ]
+            )
+            self.conn.commit()
             print("\n\nMovie Watched!")
         else:
             self.curs.execute("""
                 INSERT INTO watches (username, reldate, title, rating, watched)
                 VALUES (%s, %s, %s, %s, %s)
             """, (self.username, rel_date, movie_name, 0.0, 1))
+            self.conn.commit()
+            wdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            self.curs.execute(
+            """
+            INSERT INTO watchtime (title, reldate, watchtime)
+            VALUES (%s, %s, %s)
+            """,
+            [movie_name, rel_date, wdate, ]
+            )
             self.conn.commit()
             print("\nMovie Watched!")
     except (Exception) as error:

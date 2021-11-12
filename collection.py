@@ -1,5 +1,5 @@
 from search import watchMovie
-
+from datetime import datetime
 
 def collection(self):
     loop = True
@@ -548,6 +548,7 @@ def watchMovie(self):
             self.curs.close()
             self.conn.close()
 
+        wdate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         try:
             self.curs.execute(
             """
@@ -556,7 +557,14 @@ def watchMovie(self):
             WHERE username=%s AND title=%s;
 
             """,
-            [self.username, movieName,]
+            [self.username, movieName, ]
+            )
+            self.curs.execute(
+            """
+            INSERT INTO watchtime (title, reldate, watchtime)
+            VALUES (%s, %s, %s)
+            """,
+            [movieName, reldate, wdate, ]
             )
             self.conn.commit()
             print("Successfully logged your watching of", movieName+"\n")
