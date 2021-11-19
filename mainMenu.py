@@ -2,6 +2,7 @@ import search
 import follow
 import collection
 import profile
+import recommendation
 
 
 def mainMenu(self):
@@ -13,8 +14,9 @@ def mainMenu(self):
               "[2] Search\n"
               "[3] Followers\n"
               "[4] View Profile\n"
-              "[5] Logout of this account\n"
-              "[6] Quit")
+              "[5] View Recommendations\n"
+              "[6] Logout of this account\n"
+              "[7] Quit")
         try:
             val = int(input("Choose an option by typing a number: "))
 
@@ -27,8 +29,10 @@ def mainMenu(self):
             elif val == 4:
                 profile.profile(self)
             elif val == 5:
-                exit = True
+                recommendation.recommendation(self)
             elif val == 6:
+                exit = True
+            elif val == 7:
                 quit = True
                 exit = True
             else:

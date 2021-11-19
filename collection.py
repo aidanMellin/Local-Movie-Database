@@ -1,6 +1,7 @@
 from search import watchMovie
 from datetime import datetime
 
+
 def collection(self):
     loop = True
 
@@ -77,8 +78,9 @@ def printCollection(self):
                     total = 0
                 else:
                     total = total[0]
-                print(cname + ", Movies in collection: " + str(amount[0]) +
-                      ", Total length of movies: " + str(total // 60) + " hours:" + str(total % 60) + " minutes")
+                print(cname +
+                      ":\n\t- Movies in collection: " + str(amount[0]) +
+                      "\n\t- Total length of movies: " + str(total // 60) + " hours:" + str(total % 60) + " minutes\n")
         else:
             print("You have no Collections...")
     except (Exception) as error:
