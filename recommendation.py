@@ -32,27 +32,33 @@ def recommendation(self):
 
 
 def topFriends(self):
-    friends = []
+    movies = []
     try:
         self.curs.execute(
-            """
-            SELECT following 
-            FROM \"follows\" 
-            WHERE follower = %s
+            """            
+            SELECT title, rating
+            FROM \"follows\" F, \"watches\" W
+            WHERE follower = %s AND F.following = W.username
+            ORDER BY rating DESC
             """,
             [self.username, ]
+            # ["bmarritt9", ]
         )
-        friends = self.curs.fetchone()
+        movies = self.curs.fetchall()
     except Exception as error:
         print("Something went wrong.\n", error)
         self.curs.close()
         self.conn.close()
 
-    if friends is None:
-        print("You don't follow anyone...")
+    if movies is None or len(movies) == 0:
+        print("There are no movies to display...")
     else:
-        for friend in friends:
-            print()
+        print("Top 20 rated movies among your friends:")
+        if len(movies) > 20:
+            movies = movies[0:20]
+        for i in range(len(movies)):
+            movie = movies[i]
+            print(str(i+1) + ": " + str(movie[0]) + ", (" + str(movie[1]) + "/5.0)")
 
 
 def topmonth(self):
@@ -82,7 +88,7 @@ def topmonth(self):
     if movies is None or len(movies) == 0:
         print("There are no movies from this month.")
     else:
-        print("Top 5 Rated movies:")
+        print("Top 5 rated movies:")
         if len(movies) > 5:
             movies = movies[0:5]
         for i in range(len(movies)):
