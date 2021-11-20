@@ -54,12 +54,20 @@ def topFriends(self):
     if movies is None or len(movies) == 0:
         print("There are no movies to display...")
     else:
-        print("Top 20 rated movies among your friends:")
-        if len(movies) > 20:
-            movies = movies[0:20]
-        for i in range(len(movies)):
-            movie = movies[i]
-            print(str(i+1) + ": " + str(movie[0]) + ", (" + str(movie[1]) + "/5.0)")
+        printIt = []
+        for i in movies:
+            if i not in printIt:
+                printIt.append(i)
+            
+        print("\n\t===Top 20 rated movies among your friends===")
+        for count, value in enumerate(printIt):
+            print("{}.\t{}".format(count+1, value))
+    print("\n")
+    # if len(movies) > 20:
+    #     movies = movies[0:20]
+    # for i in range(len(movies)):
+    #     movie = movies[i]
+    #     print(str(i+1) + ": " + str(movie[0]) + ", (" + str(movie[1]) + "/5.0)")
 
 
 def topmonth(self):
