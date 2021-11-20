@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import date, timedelta
 import datetime
 
@@ -23,7 +24,7 @@ def recommendation(self):
             elif val == 3:
                 top_5(self)
             elif val == 4:
-                print("4")
+                recommend(self)
             elif val == 5:
                 loop = False
             else:
@@ -68,7 +69,6 @@ def topFriends(self):
     # for i in range(len(movies)):
     #     movie = movies[i]
     #     print(str(i+1) + ": " + str(movie[0]) + ", (" + str(movie[1]) + "/5.0)")
-
 
 def topmonth(self):
     today = date.today()
@@ -128,6 +128,26 @@ def get_allAvg(self):
 
     return sum(rtn) / len(rtn)
 
+def get_userAvg(self):
+    try:
+        self.curs.execute(
+        """
+        select rating
+        from watches
+        where rating is not NULL and username = %s
+        """,
+        [self.username]
+        )
+        rtn = self.curs.fetchall()
+        rtn = [float(str(i).split("'")[1]) for i in rtn]
+
+    except (Exception) as error:
+        print("Something went wrong.\n", error)
+        self.curs.close()
+        self.conn.close()
+
+    return sum(rtn) / len(rtn)
+
 def get_movies(self, dateRange):
     totalAvgRate = get_allAvg(self)
     sorted_rates = []
@@ -163,6 +183,102 @@ def get_movies(self, dateRange):
 
     return sorted_rates
 
+def get_top5_genre(self, genre):
+    rtn = []
+    try:
+        self.curs.execute(
+        """
+        select ca.title
+        from watches
+        join categorized_as ca on watches.title = ca.title
+        where gname = %s and rating is not null
+        order by rating desc
+        """,
+        [genre]
+        )
+        movies = self.curs.fetchall()
+        for count, value in enumerate(movies):
+            if value not in rtn:
+                count -= 1
+                rtn.append(value)
+
+        return rtn
+
+    except (Exception) as error:
+        print("Something went wrong.\n", error)
+        self.curs.close()
+        self.conn.close()
+
+def genre_hist(self, userAvg):
+    genre_history = defaultdict(int)
+    try:
+        self.curs.execute(
+        """
+        select ca.title, watched, gname, rating
+        from watches
+        join categorized_as ca on watches.title = ca.title
+        where username = %s
+        """,
+        [self.username]
+        )
+        movies = self.curs.fetchall() #Format [[uname, times watched, genre], [uname, times watched, genre]]
+        for i in movies:
+            title, watched, gname, rating = i
+            temp = Movie(title, userAvg, gname)
+            temp.update_all(watched, rating)
+            genre_history[gname] = temp.adjRate
+
+        return genre_history
+
+    except (Exception) as error:
+        print("Something went wrong.\n", error)
+        self.curs.close()
+        self.conn.close()
+
+def recommend(self):
+    uAvg = get_userAvg(self)
+
+    genreHistory = genre_hist(self, uAvg)
+    genreHistory = sorted(genreHistory.items(), key=lambda x: -x[1])
+    recommended = get_top5_genre(self, genreHistory[0][0]) 
+    print("\n\t===Movie Recommendations===")
+    print("The movie genre that you have most commonly liked has been {}. Highly rated moves of the same genre include:".format(genreHistory[0][0]))
+    for count, value in enumerate(recommended):
+        if count < 5:
+            print("{}.\t{}".format(count+1, value[0]))
+    print("\n")
+
+class Movie:
+    def __init__(self, mTitle, avgRateMovies, genre=None) -> None:
+        self.rates = []
+        self.title = mTitle
+        self.m = 0                            # Times watched
+        self.v = 0                            # number of ratings                    
+        self.R = 0                            # avg rate for movie
+        self.genre = genre
+        self.C = round(avgRateMovies , 3)  # avg rate for all movies
+
+        self.adjRate = 0
+
+    def update_adjusted_rate(self):
+        denom = self.v + self.m
+        adjRate = (self.v / denom) * self.R + (self.m / denom) * self.C
+
+        return adjRate
+
+    def update_avgRate(self):
+        if None in self.rates:
+            self.R = 0
+        else:
+            self.R = float(sum(self.rates) / len(self.rates))
+    
+    def update_all(self, wc, rate):
+        self.m += wc
+        self.v += 1
+        self.rates.append(rate)
+        self.update_avgRate()
+        self.adjRate = self.update_adjusted_rate()
+
 #-------- Quick Sort-------- -------- -------- -------
 def partition(arr, low, high):
     i = (low-1)
@@ -188,53 +304,3 @@ def quickSort(arr, low, high):
     return arr
 
 #------------------------------------------------------
-
-def rolling_ninety(self):
-    sorted = get_movies(self, 90)
-
-    print("\t===Top 20 Movies over 90 Days===")
-    for count, value in enumerate(sorted):
-        if count < 20:
-            print("{}.\t{}".format(count+1, value[0]))
-    print("\n")
-
-def top_5(self):
-    sorted = get_movies(self, 30)
-    print("\t===Top 5 Movies over 30 Days===")
-    for count, value in enumerate(sorted):
-        if count < 5:
-            print("{}.\t{}".format(count+1, value[0]))
-    print("\n")
-
-def top_20_friends():
-    ...
-
-class Movie:
-    def __init__(self, mTitle, avgRateMovies) -> None:
-        self.rates = []
-        self.title = mTitle
-        self.m = 0                            # Times watched
-        self.v = 0                            # number of ratings                    
-        self.R = 0                            # avg rate for movie
-        self.C = round(avgRateMovies , 3)  # avg rate for all movies
-
-        self.adjRate = 0
-
-    def update_adjusted_rate(self):
-        denom = self.v + self.m
-        adjRate = (self.v / denom) * self.R + (self.m / denom) * self.C
-
-        return adjRate
-
-    def update_avgRate(self):
-        if None in self.rates:
-            self.R = 0
-        else:
-            self.R = float(sum(self.rates) / len(self.rates))
-    
-    def update_all(self, wc, rate):
-        self.m += wc
-        self.v += 1
-        self.rates.append(rate)
-        self.update_avgRate()
-        self.adjRate = self.update_adjusted_rate()
