@@ -18,11 +18,11 @@ def recommendation(self):
             val = int(input("Choose an option by typing a number: "))
 
             if val == 1:
-                rolling_ninety(self)
+                get_movies(self,90)
             elif val == 2:
                 topFriends(self)
             elif val == 3:
-                top_5(self)
+                topmonth(self)
             elif val == 4:
                 recommend(self)
             elif val == 5:
@@ -64,11 +64,6 @@ def topFriends(self):
         for count, value in enumerate(printIt):
             print("{}.\t{}".format(count+1, value))
     print("\n")
-    # if len(movies) > 20:
-    #     movies = movies[0:20]
-    # for i in range(len(movies)):
-    #     movie = movies[i]
-    #     print(str(i+1) + ": " + str(movie[0]) + ", (" + str(movie[1]) + "/5.0)")
 
 def topmonth(self):
     today = date.today()
