@@ -18,7 +18,14 @@ def recommendation(self):
             val = int(input("Choose an option by typing a number: "))
 
             if val == 1:
-                get_movies(self,90)
+                x = get_movies(self,90)
+                y = 1
+                for i in x:
+                    title, rating = i
+                    print("[",y,"]",title,",", rating)
+                    y += 1
+                    if y > 20:
+                        break
             elif val == 2:
                 topFriends(self)
             elif val == 3:
@@ -98,9 +105,9 @@ def topmonth(self):
         for i in range(len(movies)):
             movie = movies[i]
             if movie[3] is None:
-                print(str(i+1) + ": " + movie[1] + ", " + movie[2])
+                print(str(i+1),":",movie[1],",",movie[2])
             else:
-                print(str(i+1) + ": " + movie[1] + ", " + movie[2] + " (" + movie[3] + "/5)")
+                print(str(i+1),":",movie[1],",",movie[2]," (",movie[3],"/5)")
 
 #------------------------------------------------------------------------------------------------
 
