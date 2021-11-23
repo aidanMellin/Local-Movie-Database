@@ -16,18 +16,8 @@ def recommendation(self):
 
         try:
             val = int(input("Choose an option by typing a number: "))
-
             if val == 1:
-                x = get_movies(self,90)
-                y = 1
-                print("Most popular 20 movies over the last 90 days")
-                for i in x:
-                    title, rating = i
-                    rating = round(rating, 2)
-                    print("[" + str(y) + "] " + title + ", " + str(rating))
-                    y += 1
-                    if y > 20:
-                        break
+                get_movies(self,90)
             elif val == 2:
                 topFriends(self)
             elif val == 3:
@@ -185,7 +175,11 @@ def get_movies(self, dateRange):
         sorted_rates.append([i, movieDict.get(i).adjRate])
     sorted_rates = quickSort(sorted_rates, 0, len(sorted_rates)-1)
 
-    return sorted_rates
+    print("\n\t===Top 20 Movies over 90 Days===")
+    for count, value in enumerate(sorted_rates):
+        if count < 20:
+            print("{}.\t{}".format(count+1, value[0]))
+    print("\n")
 
 def get_top5_genre(self, genre):
     rtn = []
