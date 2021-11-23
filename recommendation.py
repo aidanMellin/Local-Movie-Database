@@ -43,7 +43,7 @@ def topFriends(self):
             ORDER BY rating DESC
             """,
             [self.username, ]
-            # ["bmarritt9", ]
+            # ["bmarritt9", ]  # Test user
         )
         movies = self.curs.fetchall()
     except Exception as error:
@@ -61,8 +61,10 @@ def topFriends(self):
             
         print("\n\t===Top 20 rated movies among your friends===")
         for count, value in enumerate(printIt):
-            print("{}.\t{}".format(count+1, value))
+            if count < 20:
+                print("{}.\t{}, {}/5".format(count+1, value[0], value[1]))
     print("\n")
+
 
 def topmonth(self):
     today = date.today()
@@ -102,6 +104,7 @@ def topmonth(self):
                 print(str(i+1) + ": " + movie[1] + ", " + movie[2] + " (" + str(movie[3]) + "/5)")
 
 #------------------------------------------------------------------------------------------------
+
 
 def get_allAvg(self):
     try:
