@@ -20,9 +20,11 @@ def recommendation(self):
             if val == 1:
                 x = get_movies(self,90)
                 y = 1
+                print("Most popular 20 movies over the last 90 days")
                 for i in x:
                     title, rating = i
-                    print("[",y,"]",title,",", rating)
+                    rating = round(rating, 2)
+                    print("[" + str(y) + "] " + title + ", " + str(rating))
                     y += 1
                     if y > 20:
                         break
@@ -105,9 +107,9 @@ def topmonth(self):
         for i in range(len(movies)):
             movie = movies[i]
             if movie[3] is None:
-                print(str(i+1),":",movie[1],",",movie[2])
+                print(str(i+1) + ": " + movie[1] + ", " + movie[2])
             else:
-                print(str(i+1),":",movie[1],",",movie[2]," (",movie[3],"/5)")
+                print(str(i+1) + ": " + movie[1] + ", " + movie[2] + " (" + str(movie[3]) + "/5)")
 
 #------------------------------------------------------------------------------------------------
 
