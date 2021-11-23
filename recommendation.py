@@ -62,7 +62,10 @@ def topFriends(self):
         print("\n\t===Top 20 rated movies among your friends===")
         for count, value in enumerate(printIt):
             if count < 20:
-                print("{}.\t{}, {}/5".format(count+1, value[0], value[1]))
+                if value[1] is None:
+                    print("{}.\t{}, Unrated".format(count+1, value[0]))
+                else:
+                    print("{}.\t{}, {}/5".format(count+1, value[0], value[1]))
     print("\n")
 
 
